@@ -1,0 +1,830 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>AgentOS — 未来的人机交互范式</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'PingFang SC', 'Hiragino Sans GB', sans-serif; background: #f7f6f3; color: #1a1a18; font-size: 14px; line-height: 1.6; }
+
+  .tab-bar { display: flex; gap: 0; background: #fff; border-bottom: 0.5px solid rgba(0,0,0,0.12); padding: 0 32px; position: sticky; top: 0; z-index: 100; }
+  .tab-btn { padding: 14px 20px; cursor: pointer; font-size: 14px; color: #666; border-bottom: 2px solid transparent; background: none; border-top: none; border-left: none; border-right: none; transition: color 0.2s; font-family: inherit; }
+  .tab-btn.active { color: #1a1a18; border-bottom-color: #534AB7; font-weight: 500; }
+  .tab-btn:hover:not(.active) { color: #333; }
+
+  .tab-panel { display: none; }
+  .tab-panel.active { display: block; }
+
+  /* ===== VISION TAB ===== */
+  .vision-container { max-width: 800px; margin: 0 auto; padding: 48px 32px; }
+  .vision-hero { margin-bottom: 48px; }
+  .vision-hero h1 { font-size: 28px; font-weight: 500; color: #1a1a18; margin-bottom: 8px; }
+  .vision-hero .subtitle { font-size: 15px; color: #888780; }
+
+  .section { margin-bottom: 48px; }
+  .section-label { font-size: 11px; color: #534AB7; font-weight: 500; letter-spacing: 0.08em; text-transform: uppercase; margin-bottom: 12px; }
+  .section h2 { font-size: 18px; font-weight: 500; color: #1a1a18; margin-bottom: 16px; }
+  .section p { font-size: 14px; color: #444441; line-height: 1.8; margin-bottom: 12px; }
+  .section p:last-child { margin-bottom: 0; }
+
+  .concept-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; margin: 20px 0; }
+  .concept-card { background: #fff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 20px; }
+  .concept-card .card-icon { width: 32px; height: 32px; border-radius: 8px; display: flex; align-items: center; justify-content: center; margin-bottom: 12px; font-size: 16px; }
+  .concept-card h3 { font-size: 14px; font-weight: 500; margin-bottom: 6px; }
+  .concept-card p { font-size: 13px; color: #666; margin: 0; line-height: 1.6; }
+  .icon-purple { background: #EEEDFE; color: #534AB7; }
+  .icon-teal { background: #E1F5EE; color: #0F6E56; }
+  .icon-amber { background: #FAEEDA; color: #854F0B; }
+  .icon-blue { background: #E6F1FB; color: #185FA5; }
+
+  .atom-list { display: flex; flex-wrap: wrap; gap: 8px; margin: 16px 0; }
+  .atom-chip { background: #EEEDFE; color: #534AB7; padding: 4px 12px; border-radius: 99px; font-size: 12px; font-weight: 500; }
+  .atom-chip.new { background: #E1F5EE; color: #0F6E56; border: 1px dashed #1D9E75; }
+
+  .case-box { background: #fff; border: 0.5px solid rgba(0,0,0,0.1); border-radius: 12px; padding: 24px; margin: 20px 0; }
+  .case-box .before-after { display: grid; grid-template-columns: 1fr auto 1fr; gap: 16px; align-items: start; }
+  .case-col h4 { font-size: 12px; font-weight: 500; color: #888; margin-bottom: 12px; text-transform: uppercase; letter-spacing: 0.05em; }
+  .step-list { list-style: none; }
+  .step-list li { font-size: 13px; color: #444; padding: 6px 0; border-bottom: 0.5px solid #f0ede8; display: flex; align-items: center; gap: 8px; }
+  .step-list li:last-child { border-bottom: none; }
+  .step-num { width: 20px; height: 20px; border-radius: 50%; background: #f1efe8; color: #888; font-size: 11px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .step-list.bad .step-num { background: #FCEBEB; color: #A32D2D; }
+  .step-list.good .step-num { background: #E1F5EE; color: #0F6E56; font-size: 12px; }
+  .vs-arrow { display: flex; align-items: center; justify-content: center; color: #ccc; font-size: 18px; padding-top: 32px; }
+
+  .quote-block { border-left: 3px solid #534AB7; padding: 12px 20px; background: #EEEDFE22; border-radius: 0 8px 8px 0; margin: 20px 0; }
+  .quote-block p { font-size: 14px; color: #3C3489; font-style: italic; line-height: 1.7; }
+
+  .timeline { position: relative; padding-left: 24px; }
+  .timeline::before { content: ''; position: absolute; left: 5px; top: 8px; bottom: 8px; width: 1px; background: #e0ddd8; }
+  .timeline-item { position: relative; margin-bottom: 20px; }
+  .timeline-item::before { content: ''; position: absolute; left: -19px; top: 5px; width: 8px; height: 8px; border-radius: 50%; background: #fff; border: 2px solid #534AB7; }
+  .timeline-item h4 { font-size: 13px; font-weight: 500; color: #534AB7; margin-bottom: 4px; }
+  .timeline-item p { font-size: 13px; color: #666; }
+
+  .divider { height: 0.5px; background: rgba(0,0,0,0.08); margin: 48px 0; }
+
+  /* ===== DEMO TAB ===== */
+  .demo-container { display: flex; height: calc(100vh - 49px); overflow: hidden; }
+
+  .robot-panel { width: 55%; flex-shrink: 0; background: #1a1a1f; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 16px 24px; gap: 16px; position: relative; min-width: 420px; }
+
+  .robot-body { position: relative; width: 260px; }
+  .robot-head { width: 260px; height: 200px; background: #2a2a32; border-radius: 30px; margin: 0 auto; position: relative; display: flex; flex-direction: column; align-items: center; justify-content: center; border: 1px solid #3a3a44; }
+  .robot-screen { width: 230px; height: 170px; background: #0f1117; border-radius: 14px; position: relative; overflow: hidden; border: 1px solid #444; }
+  .robot-screen-content { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; }
+  .robot-eye-left, .robot-eye-right { width: 10px; height: 10px; border-radius: 50%; background: #534AB7; position: absolute; top: 16px; }
+  .robot-eye-left { left: 20px; }
+  .robot-eye-right { right: 20px; }
+  .robot-ear { width: 12px; height: 36px; background: #2a2a32; border-radius: 6px; position: absolute; top: 56px; border: 1px solid #3a3a44; }
+  .robot-ear.left { left: -12px; }
+  .robot-ear.right { right: -12px; }
+
+  .robot-torso { width: 200px; height: 100px; background: #2a2a32; border-radius: 20px; margin: 12px auto 0; position: relative; display: flex; align-items: center; justify-content: center; border: 1px solid #3a3a44; }
+  .robot-chest-light { width: 52px; height: 52px; border-radius: 50%; border: 2px solid #534AB7; display: flex; align-items: center; justify-content: center; }
+  .robot-chest-inner { width: 30px; height: 30px; border-radius: 50%; background: #534AB7; opacity: 0.8; }
+
+  .robot-arms { display: flex; justify-content: space-between; width: 240px; margin-top: -70px; }
+  .robot-arm { width: 24px; height: 90px; background: #2a2a32; border-radius: 10px; border: 1px solid #3a3a44; }
+
+  .robot-legs { display: flex; justify-content: center; gap: 16px; margin-top: 10px; }
+  .robot-leg { width: 36px; height: 60px; background: #2a2a32; border-radius: 10px; border: 1px solid #3a3a44; }
+
+  .robot-status { text-align: center; }
+  .robot-name { font-size: 14px; color: #aaa; font-weight: 500; }
+  .robot-state { font-size: 13px; color: #534AB7; margin-top: 3px; }
+
+  .listening-ring { width: 240px; height: 240px; border-radius: 50%; border: 1px solid #534AB733; display: flex; align-items: center; justify-content: center; position: absolute; }
+  .listening-ring-2 { width: 180px; height: 180px; border-radius: 50%; border: 1px solid #534AB755; display: flex; align-items: center; justify-content: center; position: absolute; }
+
+  .pulse-dot { width: 8px; height: 8px; border-radius: 50%; background: #534AB7; }
+
+  .interaction-panel { width: 45%; display: flex; flex-direction: column; background: #f7f6f3; overflow: hidden; border-left: 1px solid #e0ddd8; }
+  .interaction-panel .panel-header { padding: 12px 16px; background: #fff; border-bottom: 0.5px solid rgba(0,0,0,0.1); font-size: 12px; color: #888; font-weight: 500; display: flex; align-items: center; gap: 6px; }
+  .interaction-panel .panel-header::before { content: ''; display: inline-block; width: 6px; height: 6px; border-radius: 50%; background: #534AB7; }
+
+  .scenario-bar { background: #fff; border-bottom: 0.5px solid rgba(0,0,0,0.1); padding: 8px 12px; display: flex; gap: 6px; align-items: center; flex-wrap: wrap; }
+  .scenario-bar span { font-size: 11px; color: #888; }
+  .scenario-btn { padding: 4px 10px; border-radius: 99px; border: 0.5px solid rgba(0,0,0,0.15); background: none; font-size: 11px; cursor: pointer; font-family: inherit; color: #444; transition: all 0.15s; }
+  .scenario-btn:hover, .scenario-btn.active { background: #534AB7; color: #fff; border-color: #534AB7; }
+
+  .chat-area { flex: 1; overflow-y: auto; padding: 14px; display: flex; flex-direction: column; gap: 10px; }
+
+  .msg { display: flex; gap: 8px; max-width: 95%; }
+  .msg.user { align-self: flex-end; flex-direction: row-reverse; }
+  .msg-avatar { width: 24px; height: 24px; border-radius: 50%; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 500; margin-top: 2px; }
+  .msg-avatar.agent { background: #534AB7; color: #fff; }
+  .msg-avatar.user { background: #1D9E75; color: #fff; }
+  .msg-bubble { background: #fff; border-radius: 10px; padding: 8px 12px; font-size: 12px; line-height: 1.5; border: 0.5px solid rgba(0,0,0,0.08); }
+  .msg.user .msg-bubble { background: #1a1a1f; color: #eee; border-color: transparent; }
+  .msg-bubble .msg-time { font-size: 10px; color: #aaa; margin-top: 3px; }
+
+  .msg-log { font-size: 11px; color: #888; text-align: center; padding: 2px 0; font-style: italic; }
+
+  .ui-card { background: #fff; border-radius: 12px; border: 0.5px solid rgba(0,0,0,0.1); padding: 16px; margin-top: 8px; min-width: 260px; }
+  .ui-card-title { font-size: 12px; color: #888; margin-bottom: 10px; font-weight: 500; }
+  .contact-list { display: flex; flex-direction: column; gap: 6px; }
+  .contact-item { display: flex; align-items: center; gap: 10px; padding: 8px 10px; border-radius: 8px; cursor: pointer; transition: background 0.15s; }
+  .contact-item:hover { background: #f7f6f3; }
+  .contact-item.selected { background: #EEEDFE; }
+  .contact-avatar { width: 32px; height: 32px; border-radius: 50%; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 500; flex-shrink: 0; }
+  .contact-name { font-size: 13px; }
+  .contact-last { font-size: 11px; color: #aaa; }
+
+  .confirm-btns { display: flex; gap: 8px; margin-top: 12px; }
+  .btn-confirm { flex: 1; padding: 8px; border-radius: 8px; border: none; font-size: 13px; cursor: pointer; font-family: inherit; }
+  .btn-confirm.primary { background: #534AB7; color: #fff; }
+  .btn-confirm.secondary { background: #f1efe8; color: #444; }
+
+  .photo-preview { width: 100%; height: 100px; background: linear-gradient(135deg, #c8d4e8 0%, #a8bcd8 100%); border-radius: 8px; display: flex; align-items: center; justify-content: center; color: #7a8fa8; font-size: 12px; margin-bottom: 10px; }
+
+  .atom-flow { display: flex; gap: 6px; flex-wrap: wrap; margin-top: 8px; }
+  .atom-tag { background: #EEEDFE; color: #534AB7; padding: 3px 8px; border-radius: 4px; font-size: 11px; font-weight: 500; }
+  .atom-arrow { color: #aaa; font-size: 12px; align-self: center; }
+
+  .input-row { padding: 10px 14px; background: #fff; border-top: 0.5px solid rgba(0,0,0,0.08); display: flex; gap: 8px; align-items: center; }
+  .input-row input { flex: 1; padding: 7px 12px; border-radius: 99px; border: 0.5px solid rgba(0,0,0,0.15); background: #f7f6f3; font-size: 12px; font-family: inherit; outline: none; }
+  .input-row input:focus { border-color: #534AB7; background: #fff; }
+  .send-btn { width: 30px; height: 30px; border-radius: 50%; background: #534AB7; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .send-btn svg { fill: #fff; }
+  .mic-btn { width: 30px; height: 30px; border-radius: 50%; background: #f1efe8; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+  .mic-btn.active { background: #534AB7; }
+
+  @keyframes pulse-ring {
+    0% { transform: scale(1); opacity: 0.6; }
+    50% { transform: scale(1.08); opacity: 0.3; }
+    100% { transform: scale(1); opacity: 0.6; }
+  }
+  .pulsing { animation: pulse-ring 2s ease-in-out infinite; }
+
+  @keyframes blink-eye {
+    0%, 90%, 100% { transform: scaleY(1); }
+    95% { transform: scaleY(0.1); }
+  }
+  .eye-anim { animation: blink-eye 4s ease-in-out infinite; transform-origin: center; }
+
+  .screen-face { display: flex; gap: 18px; align-items: center; justify-content: center; }
+  .screen-eye { width: 12px; height: 12px; border-radius: 50%; background: #534AB7; }
+  .screen-mouth { width: 36px; height: 3px; background: #534AB777; border-radius: 3px; }
+  .screen-smile { width: 36px; height: 18px; border-bottom: 3px solid #534AB7; border-radius: 0 0 18px 18px; }
+
+  .agent-typing { display: flex; gap: 3px; align-items: center; padding: 8px 12px; background: #fff; border-radius: 10px; border: 0.5px solid rgba(0,0,0,0.08); width: fit-content; }
+  .typing-dot { width: 4px; height: 4px; border-radius: 50%; background: #bbb; animation: typing-bounce 1.2s ease-in-out infinite; }
+  .typing-dot:nth-child(2) { animation-delay: 0.2s; }
+  .typing-dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes typing-bounce {
+    0%, 60%, 100% { transform: translateY(0); }
+    30% { transform: translateY(-4px); background: #534AB7; }
+  }
+
+  .bi-chart { padding: 4px 0; }
+  .bar-row { display: flex; align-items: center; gap: 8px; margin-bottom: 6px; }
+  .bar-label { font-size: 11px; color: #666; width: 40px; text-align: right; flex-shrink: 0; }
+  .bar-track { flex: 1; height: 14px; background: #f1efe8; border-radius: 3px; overflow: hidden; }
+  .bar-fill { height: 100%; border-radius: 3px; background: #534AB7; transition: width 0.6s ease; }
+  .bar-value { font-size: 11px; color: #888; width: 28px; }
+
+  .nav-prompt { background: #f7f6f3; border-radius: 8px; padding: 10px 12px; margin-top: 8px; font-size: 12px; color: #666; }
+  .nav-prompt strong { color: #534AB7; }
+
+  .screen-mirror { width: 100%; max-width: 210px; border-radius: 10px; overflow: hidden; border: 1px solid #e0ddd8; }
+  .screen-mirror-face { padding: 6px; display: flex; align-items: center; justify-content: center; background: #0f1117; }
+  .screen-mirror-ui { padding: 8px 10px; background: #fff; font-size: 10px; line-height: 1.4; }
+  .mirror-btn { font-size: 10px !important; padding: 4px 0 !important; }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 700px) {
+    .concept-grid { grid-template-columns: 1fr; }
+    .case-box .before-after { grid-template-columns: 1fr; }
+    .vs-arrow { display: none; }
+    .demo-container { flex-direction: column; }
+    .robot-panel { width: 100%; flex-direction: row; height: auto; flex-wrap: wrap; justify-content: center; }
+  }
+</style>
+</head>
+<body>
+
+<div class="tab-bar">
+  <button class="tab-btn active" onclick="switchTab('vision')">理念与思路</button>
+  <button class="tab-btn" onclick="switchTab('demo')">具身智能演示</button>
+</div>
+
+<!-- ========== TAB 1: VISION ========== -->
+<div id="tab-vision" class="tab-panel active">
+<div class="vision-container">
+
+  <div class="vision-hero">
+    <h1>AgentOS — 重新定义人机交互</h1>
+    <p class="subtitle">当 App 消失后，世界会变成什么样</p>
+  </div>
+
+  <!-- Section 1 -->
+  <div class="section">
+    <div class="section-label">核心理念 01</div>
+    <h2>原子能力：打碎 App，重组世界</h2>
+    <p>今天的 App 是一个个孤岛。微信、相机、地图各自为政，用户必须在它们之间反复跳转。而在 AgentOS 的范式下，每个 App 的能力被拆解为最小可调用的"原子能力"——它们不再是界面，而是功能接口。</p>
+    <p>以微信为例，它的原子能力包括：</p>
+
+    <div class="atom-list">
+      <span class="atom-chip">发送消息给指定用户</span>
+      <span class="atom-chip">发送文件/图片给指定用户</span>
+      <span class="atom-chip">发起语音/视频通话</span>
+      <span class="atom-chip new">+ 读取最近聊天列表</span>
+      <span class="atom-chip new">+ 搜索联系人</span>
+    </div>
+
+    <p>AgentOS 以动态编排的方式将来自不同 App 的原子能力组合起来，完成一次完整的任务。用户感知到的，不再是"我在用某个 App"，而是"我在完成某件事"。</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="card-icon icon-purple">◆</div>
+        <h3>原子化拆解</h3>
+        <p>每个能力被细化到最小可复用粒度，可独立调用、独立授权</p>
+      </div>
+      <div class="concept-card">
+        <div class="card-icon icon-teal">⟳</div>
+        <h3>动态编排</h3>
+        <p>Agent 根据用户意图，实时选择并组合跨应用的原子能力</p>
+      </div>
+      <div class="concept-card">
+        <div class="card-icon icon-amber">◎</div>
+        <h3>意图为先</h3>
+        <p>用户表达目标，而非操作路径。"分享给老王"代替5次点击</p>
+      </div>
+      <div class="concept-card">
+        <div class="card-icon icon-blue">▤</div>
+        <h3>习惯记忆</h3>
+        <p>Agent 记住用户偏好——"老王"是谁，通常用哪个渠道联系</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Section 2 -->
+  <div class="section">
+    <div class="section-label">核心理念 02</div>
+    <h2>超越文字输出：可视化是第一生产力</h2>
+    <p>现有 AI 助手的输出几乎清一色是文字（或朗读文字的语音）。但人类大脑对视觉信息的处理效率远超文字——一张好的图表能在几秒内传达需要几百字才能描述的信息。</p>
+
+    <div class="quote-block">
+      <p>"Agent 的输出不能只是文字。一个可视化的 UI 界面或一张图表所能传达的信息，往往胜过千言万语。"</p>
+    </div>
+
+    <p>因此，具身智能的理想形态需要一个可视化的输出通道。短期来看，这是一块与机器人面部融合的屏幕；长期来看，是 AR/VR 的全息投影界面——真正做到"无缝嵌入现实"。</p>
+
+    <div class="timeline">
+      <div class="timeline-item">
+        <h4>近期（1–3年）</h4>
+        <p>与机器人面部屏幕融合的嵌入式显示，可呈现联系人列表、图表、确认弹窗等结构化信息</p>
+      </div>
+      <div class="timeline-item">
+        <h4>中期（3–7年）</h4>
+        <p>可穿戴投影设备，将信息叠加在物理世界之上，与空间感知结合</p>
+      </div>
+      <div class="timeline-item">
+        <h4>远期（7年+）</h4>
+        <p>AR/VR 全息投影，Agent 实时根据任务上下文动态生成交互界面，界面本身也成为原子能力的一部分</p>
+      </div>
+    </div>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Section 3 -->
+  <div class="section">
+    <div class="section-label">核心理念 03</div>
+    <h2>按需可视化：不是所有输出都需要界面</h2>
+    <p>并非所有原子能力都需要可视化输出。"明天天气怎样"一句话作答即可；但当信息量超过文字所能有效承载的阈值时，可视化界面的价值就凸显出来了。</p>
+    <p>Agent 需要智能判断：什么时候说话，什么时候展示界面。</p>
+
+    <div class="concept-grid">
+      <div class="concept-card">
+        <div class="card-icon icon-purple">▦</div>
+        <h3>结构化选择</h3>
+        <p>联系人列表、App 选择、文件列表——需要用户从多项中选一</p>
+      </div>
+      <div class="concept-card">
+        <div class="card-icon icon-teal">▨</div>
+        <h3>数据可视化</h3>
+        <p>BI 报表、饼图、折线图——数字关系用图形表达更直观</p>
+      </div>
+      <div class="concept-card">
+        <div class="card-icon icon-amber">▣</div>
+        <h3>操作确认</h3>
+        <p>发送前预览、危险操作二次确认——用 UI 降低误操作风险</p>
+      </div>
+      <div class="concept-card">
+        <div class="card-icon icon-blue">▩</div>
+        <h3>空间信息</h3>
+        <p>地图导航、路线规划——空间信息天然适合可视化呈现</p>
+      </div>
+    </div>
+
+    <p style="margin-top:16px;">近期，可视化界面的样式由各原子能力提供方预先设计好；远期，当 AI 的理解和生成能力足够强时，界面将由 Agent 层实时、动态地根据上下文生成。</p>
+  </div>
+
+  <div class="divider"></div>
+
+  <!-- Section 4: Case -->
+  <div class="section">
+    <div class="section-label">实际案例</div>
+    <h2>从 5 次点击到 1 句话</h2>
+    <p>以"拍照后分享给好友"为例，感受交互模式的根本性转变：</p>
+
+    <div class="case-box">
+      <div class="before-after">
+        <div class="case-col">
+          <h4>今天的操作路径</h4>
+          <ul class="step-list bad">
+            <li><span class="step-num">1</span>拍完照片，点击「分享」</li>
+            <li><span class="step-num">2</span>从分享列表选择「微信」</li>
+            <li><span class="step-num">3</span>选择「发送给朋友」</li>
+            <li><span class="step-num">4</span>从聊天列表找到并选中好友</li>
+            <li><span class="step-num">5</span>点击「发送」按钮</li>
+          </ul>
+        </div>
+        <div class="vs-arrow">→</div>
+        <div class="case-col">
+          <h4>AgentOS 的交互</h4>
+          <ul class="step-list good">
+            <li><span class="step-num">◆</span>说一句话：「分享给老王」</li>
+            <li><span class="step-num">◆</span>Agent 识别意图 + 匹配联系人</li>
+            <li><span class="step-num">◆</span>屏幕呈现确认界面（可选择戳屏或说「确认」）</li>
+          </ul>
+          <div class="atom-flow" style="margin-top:12px;">
+            <span class="atom-tag">意图识别</span>
+            <span class="atom-arrow">→</span>
+            <span class="atom-tag">联系人匹配</span>
+            <span class="atom-arrow">→</span>
+            <span class="atom-tag">微信:发送图片</span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<!-- ========== TAB 2: DEMO ========== -->
+<div id="tab-demo" class="tab-panel">
+<div class="demo-container">
+
+  <!-- Robot Visualization -->
+  <div class="robot-panel">
+    <div style="position:relative; width:260px; height:260px; display:flex; align-items:center; justify-content:center;">
+      <div class="listening-ring pulsing" id="outerRing"></div>
+      <div class="listening-ring-2 pulsing" style="animation-delay:0.5s" id="innerRing"></div>
+      <div class="pulse-dot" id="centerDot"></div>
+    </div>
+
+    <div class="robot-body">
+      <div style="position:relative;">
+        <div class="robot-head">
+          <div class="robot-ear left"></div>
+          <div class="robot-ear right"></div>
+          <div class="robot-screen" id="robotScreen">
+            <div class="robot-screen-content" id="screenContent">
+              <div class="screen-face">
+                <div class="screen-eye eye-anim"></div>
+                <div class="screen-smile"></div>
+                <div class="screen-eye eye-anim" style="animation-delay:0.3s"></div>
+              </div>
+            </div>
+          </div>
+        </div>
+        <div style="display:flex; justify-content:space-between; width:240px; margin:0 auto; margin-top:-60px;">
+          <div class="robot-arm" style="border-radius:10px 10px 14px 14px;"></div>
+          <div style="width:200px;"></div>
+          <div class="robot-arm" style="border-radius:10px 10px 14px 14px;"></div>
+        </div>
+        <div class="robot-torso">
+          <div class="robot-chest-light">
+            <div class="robot-chest-inner" id="chestLight"></div>
+          </div>
+        </div>
+        <div class="robot-legs">
+          <div class="robot-leg"></div>
+          <div class="robot-leg"></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="robot-status">
+      <div class="robot-name">ARIA — AgentOS 具身体</div>
+      <div class="robot-state" id="robotState">待机中</div>
+    </div>
+
+    <div style="width:100%; border-top: 0.5px solid #333; padding-top:16px;">
+      <div style="font-size:11px; color:#666; margin-bottom:8px;">原子能力调用栈</div>
+      <div id="atomStack" style="display:flex; flex-direction:column; gap:4px; min-height:40px;">
+        <div style="font-size:11px; color:#444; font-style:italic;">无活跃调用</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Interaction Panel -->
+  <div class="interaction-panel">
+    <div class="panel-header">交互日志 — 人类与 ARIA 的对话</div>
+    <div class="scenario-bar">
+      <span>场景：</span>
+      <button class="scenario-btn active" onclick="loadScenario('photo')">📷 拍照分享</button>
+      <button class="scenario-btn" onclick="loadScenario('report')">📊 数据报表</button>
+      <button class="scenario-btn" onclick="loadScenario('nav')">🗺 出行导航</button>
+    </div>
+
+    <div class="chat-area" id="chatArea">
+    </div>
+
+    <div class="input-row">
+      <button class="mic-btn" id="micBtn" onclick="toggleMic()">
+        <svg width="14" height="14" viewBox="0 0 14 14"><rect x="4" y="1" width="6" height="8" rx="3" fill="#666"/><path d="M2 7c0 2.76 2.24 5 5 5s5-2.24 5-5" stroke="#666" stroke-width="1.2" fill="none" stroke-linecap="round"/><line x1="7" y1="12" x2="7" y2="14" stroke="#666" stroke-width="1.2" stroke-linecap="round"/></svg>
+      </button>
+      <input type="text" id="chatInput" placeholder="输入指令，或点击麦克风说话…" onkeydown="if(event.key==='Enter')sendMsg()">
+      <button class="send-btn" onclick="sendMsg()">
+        <svg width="14" height="14" viewBox="0 0 14 14"><path d="M1 7L13 1L9 7L13 13L1 7Z" fill="white"/></svg>
+      </button>
+    </div>
+  </div>
+
+</div>
+</div>
+
+<script>
+function switchTab(id) {
+  document.querySelectorAll('.tab-panel').forEach(p => p.classList.remove('active'));
+  document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('tab-' + id).classList.add('active');
+  event.target.classList.add('active');
+}
+
+// ===== ROBOT SCREEN STATES (230x170 canvas) =====
+function setScreen(type) {
+  const sc = document.getElementById('screenContent');
+  if (type === 'idle') {
+    sc.innerHTML = '<div class="screen-face"><div class="screen-eye eye-anim"></div><div class="screen-smile"></div><div class="screen-eye eye-anim" style="animation-delay:0.3s"></div></div>';
+  } else if (type === 'thinking') {
+    sc.innerHTML = '<div class="screen-face" style="flex-direction:column;gap:8px;"><div style="display:flex;gap:20px;"><div style="width:11px;height:11px;border-radius:50%;background:#534AB7;transform:translateY(-4px);"></div><div style="width:11px;height:11px;border-radius:50%;background:#534AB7;transform:translateY(-4px);"></div></div><div style="width:26px;height:3px;background:#534AB788;border-radius:3px;"></div></div>';
+  } else if (type === 'happy') {
+    sc.innerHTML = '<div class="screen-face" style="flex-direction:column;gap:6px;"><div style="display:flex;gap:20px;"><div style="width:12px;height:12px;border-radius:50%;background:#534AB7;"></div><div style="width:12px;height:12px;border-radius:50%;background:#534AB7;"></div></div><div style="width:40px;height:18px;border-bottom:3px solid #534AB7;border-radius:0 0 20px 20px;"></div></div>';
+  } else if (type === 'confirm-photo') {
+    sc.innerHTML = `<div style="width:100%;height:100%;background:#fff;display:flex;flex-direction:column;padding:10px 12px;justify-content:space-between;">
+      <div style="font-size:11px;font-weight:500;color:#888;margin-bottom:6px;">📷 分享照片</div>
+      <div style="height:55px;background:linear-gradient(135deg,#c8d4e8,#a8bcd8);border-radius:8px;display:flex;align-items:center;justify-content:center;color:#7a8fa8;font-size:24px;margin-bottom:8px;">📷</div>
+      <div style="display:flex;align-items:center;gap:8px;padding:7px 8px;background:#EEEDFE;border-radius:8px;margin-bottom:4px;">
+        <div style="width:30px;height:30px;border-radius:50%;background:#534AB7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:13px;color:#fff;font-weight:500;">王</div>
+        <div style="flex:1;overflow:hidden;">
+          <div style="font-size:12px;color:#1a1a18;font-weight:500;">王建国（老王）</div>
+          <div style="font-size:10px;color:#aaa;">通过微信发送？</div>
+        </div>
+      </div>
+      <div style="display:flex;gap:6px;">
+        <div style="flex:1;background:#534AB7;border-radius:6px;padding:6px 0;text-align:center;font-size:12px;color:#fff;font-weight:500;cursor:pointer;" onclick="robotAction('photo','confirm')">确认</div>
+        <div style="flex:1;background:#f1efe8;border-radius:6px;padding:6px 0;text-align:center;font-size:12px;color:#666;cursor:pointer;" onclick="robotAction('photo','cancel')">取消</div>
+      </div>
+    </div>`;
+  } else if (type === 'confirm-report') {
+    sc.innerHTML = `<div style="width:100%;height:100%;background:#fff;display:flex;flex-direction:column;padding:10px 12px;justify-content:space-between;">
+      <div style="font-size:11px;font-weight:500;color:#888;margin-bottom:2px;">📊 本周销售额（万元）</div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex:1;padding:4px 0;">
+        <div style="display:flex;align-items:center;gap:6px;"><div style="font-size:10px;color:#666;width:24px;text-align:right;">线上</div><div style="flex:1;height:14px;background:#f1efe8;border-radius:3px;overflow:hidden;"><div style="height:100%;width:82%;background:#534AB7;border-radius:3px;"></div></div><div style="font-size:10px;color:#aaa;width:22px;">82</div></div>
+        <div style="display:flex;align-items:center;gap:6px;"><div style="font-size:10px;color:#666;width:24px;text-align:right;">门店</div><div style="flex:1;height:14px;background:#f1efe8;border-radius:3px;overflow:hidden;"><div style="height:100%;width:54%;background:#1D9E75;border-radius:3px;"></div></div><div style="font-size:10px;color:#aaa;width:22px;">54</div></div>
+        <div style="display:flex;align-items:center;gap:6px;"><div style="font-size:10px;color:#666;width:24px;text-align:right;">分销</div><div style="flex:1;height:14px;background:#f1efe8;border-radius:3px;overflow:hidden;"><div style="height:100%;width:31%;background:#854F0B;border-radius:3px;"></div></div><div style="font-size:10px;color:#aaa;width:22px;">31</div></div>
+        <div style="display:flex;align-items:center;gap:6px;"><div style="font-size:10px;color:#666;width:24px;text-align:right;">直播</div><div style="flex:1;height:14px;background:#f1efe8;border-radius:3px;overflow:hidden;"><div style="height:100%;width:63%;background:#185FA5;border-radius:3px;"></div></div><div style="font-size:10px;color:#aaa;width:22px;">63</div></div>
+      </div>
+      <div style="font-size:10px;color:#0F6E56;text-align:right;margin-top:2px;">总计 230万 · 环比 +12.3%</div>
+      <div style="background:#f1efe8;border-radius:6px;padding:5px 0;text-align:center;font-size:11px;color:#666;cursor:pointer;margin-top:4px;" onclick="robotAction('report','close')">关闭</div>
+    </div>`;
+  } else if (type === 'confirm-nav') {
+    sc.innerHTML = `<div style="width:100%;height:100%;background:#fff;display:flex;flex-direction:column;padding:10px 12px;justify-content:space-between;">
+      <div style="font-size:11px;font-weight:500;color:#888;margin-bottom:4px;">🗺 去公司 — 路线规划</div>
+      <div style="display:flex;flex-direction:column;gap:6px;flex:1;">
+        <div style="padding:7px 8px;background:#EEEDFE;border-radius:7px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="robotAction('nav','metro')">
+          <div><div style="font-size:11px;font-weight:500;">🚇 地铁10号线</div><div style="font-size:9px;color:#888;">步行+乘车</div></div>
+          <div style="font-size:11px;color:#534AB7;font-weight:500;background:#fff;padding:3px 7px;border-radius:4px;">28min</div>
+        </div>
+        <div style="padding:7px 8px;background:#f7f6f3;border-radius:7px;display:flex;justify-content:space-between;align-items:center;cursor:pointer;" onclick="robotAction('nav','drive')">
+          <div><div style="font-size:11px;">🚗 驾车·三环辅路</div><div style="font-size:9px;color:#A32D2D;">路况拥堵</div></div>
+          <div style="font-size:11px;color:#A32D2D;font-weight:500;background:#FCEBEB;padding:3px 7px;border-radius:4px;">52min</div>
+        </div>
+      </div>
+      <div style="background:#f1efe8;border-radius:6px;padding:5px 0;text-align:center;font-size:11px;color:#666;cursor:pointer;margin-top:4px;" onclick="robotAction('nav','close')">关闭</div>
+    </div>`;
+  }
+}
+
+function setRobotState(txt) {
+  document.getElementById('robotState').textContent = txt;
+}
+
+function setAtomStack(atoms) {
+  const el = document.getElementById('atomStack');
+  if (!atoms || atoms.length === 0) {
+    el.innerHTML = '<div style="font-size:11px;color:#444;font-style:italic;">无活跃调用</div>';
+    return;
+  }
+  el.innerHTML = atoms.map((a,i) => `<div style="display:flex;align-items:center;gap:6px;"><span style="font-size:9px;color:#534AB7;font-weight:500;">${i+1}</span><span style="font-size:11px;color:#aaa;background:#2a2a32;border-radius:4px;padding:2px 7px;">${a}</span></div>`).join('');
+}
+
+// ===== CHAT ENGINE =====
+const chatArea = document.getElementById('chatArea');
+
+function addMsg(role, content, delay=0) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = 'msg ' + (role === 'user' ? 'user' : 'agent');
+      const avatarTxt = role === 'user' ? '我' : 'AI';
+      div.innerHTML = `<div class="msg-avatar ${role}">${avatarTxt}</div><div class="msg-bubble">${content}</div>`;
+      chatArea.appendChild(div);
+      chatArea.scrollTop = chatArea.scrollHeight;
+      resolve();
+    }, delay);
+  });
+}
+
+function addTyping(delay=0) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = 'msg agent';
+      div.id = 'typingIndicator';
+      div.innerHTML = '<div class="msg-avatar agent">AI</div><div class="agent-typing"><div class="typing-dot"></div><div class="typing-dot"></div><div class="typing-dot"></div></div>';
+      chatArea.appendChild(div);
+      chatArea.scrollTop = chatArea.scrollHeight;
+      resolve();
+    }, delay);
+  });
+}
+
+function removeTyping() {
+  const el = document.getElementById('typingIndicator');
+  if (el) el.remove();
+}
+
+function addScreenMirror(type, delay=0) {
+  return new Promise(resolve => {
+    setTimeout(() => {
+      const div = document.createElement('div');
+      div.className = 'msg agent';
+      const avatarTxt = 'AI';
+      let html = '';
+
+      if (type === 'idle') {
+        html = `<div class="screen-mirror"><div class="screen-mirror-face" style="height:58px;">
+          <div style="display:flex;gap:12px;align-items:center;"><div style="width:7px;height:7px;border-radius:50%;background:#534AB7;"></div><div style="width:24px;height:14px;border-bottom:2px solid #534AB7;border-radius:0 0 12px 12px;"></div><div style="width:7px;height:7px;border-radius:50%;background:#534AB7;"></div></div></div></div>`;
+      } else if (type === 'thinking') {
+        html = `<div class="screen-mirror"><div class="screen-mirror-face" style="height:58px;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:6px;"><div style="display:flex;gap:14px;"><div style="width:7px;height:7px;border-radius:50%;background:#534AB7;transform:translateY(-3px);"></div><div style="width:7px;height:7px;border-radius:50%;background:#534AB7;transform:translateY(-3px);"></div></div><div style="width:18px;height:2px;background:#534AB788;border-radius:2px;"></div></div></div></div>`;
+      } else if (type === 'happy') {
+        html = `<div class="screen-mirror"><div class="screen-mirror-face" style="height:58px;">
+          <div style="display:flex;flex-direction:column;align-items:center;gap:4px;"><div style="display:flex;gap:14px;"><div style="width:8px;height:8px;border-radius:50%;background:#534AB7;"></div><div style="width:8px;height:8px;border-radius:50%;background:#534AB7;"></div></div><div style="width:26px;height:12px;border-bottom:2px solid #534AB7;border-radius:0 0 14px 14px;"></div></div></div></div>`;
+      } else if (type === 'confirm-photo') {
+        html = `<div class="screen-mirror"><div class="screen-mirror-ui">
+          <div style="font-size:10px;font-weight:500;color:#888;margin-bottom:6px;">📷 分享照片</div>
+          <div style="height:48px;background:linear-gradient(135deg,#c8d4e8,#a8bcd8);border-radius:6px;display:flex;align-items:center;justify-content:center;color:#7a8fa8;font-size:20px;margin-bottom:7px;">📷</div>
+          <div style="display:flex;align-items:center;gap:7px;padding:6px 7px;background:#EEEDFE;border-radius:6px;margin-bottom:4px;">
+            <div style="width:26px;height:26px;border-radius:50%;background:#534AB7;display:flex;align-items:center;justify-content:center;flex-shrink:0;font-size:11px;color:#fff;font-weight:500;">王</div>
+            <div style="flex:1;overflow:hidden;">
+              <div style="font-size:11px;color:#1a1a18;font-weight:500;">王建国（老王）</div>
+              <div style="font-size:9px;color:#aaa;">通过微信发送？</div>
+            </div>
+          </div>
+          <div style="display:flex;gap:5px;">
+            <div class="mirror-btn" style="flex:1;background:#534AB7;border-radius:5px;text-align:center;color:#fff;font-weight:500;">确认</div>
+            <div class="mirror-btn" style="flex:1;background:#f1efe8;border-radius:5px;text-align:center;color:#666;">取消</div>
+          </div></div></div>`;
+      } else if (type === 'confirm-report') {
+        html = `<div class="screen-mirror"><div class="screen-mirror-ui">
+          <div style="font-size:10px;font-weight:500;color:#888;margin-bottom:3px;">📊 本周销售额（万元）</div>
+          <div style="display:flex;flex-direction:column;gap:5px;padding:2px 0;">
+            <div style="display:flex;align-items:center;gap:5px;"><div style="font-size:9px;color:#666;width:20px;text-align:right;">线上</div><div style="flex:1;height:12px;background:#f1efe8;border-radius:3px;overflow:hidden;"><div style="height:100%;width:82%;background:#534AB7;border-radius:3px;"></div></div><div style="font-size:9px;color:#aaa;width:18px;">82</div></div>
+            <div style="display:flex;align-items:center;gap:5px;"><div style="font-size:9px;color:#666;width:20px;text-align:right;">门店</div><div style="flex:1;height:12px;background:#f1efe8;border-radius:3px;overflow:hidden;"><div style="height:100%;width:54%;background:#1D9E75;border-radius:3px;"></div></div><div style="font-size:9px;color:#aaa;width:18px;">54</div></div>
+            <div style="display:flex;align-items:center;gap:5px;"><div style="font-size:9px;color:#666;width:20px;text-align:right;">分销</div><div style="flex:1;height:12px;background:#f1efe8;border-radius:3px;overflow:hidden;"><div style="height:100%;width:31%;background:#854F0B;border-radius:3px;"></div></div><div style="font-size:9px;color:#aaa;width:18px;">31</div></div>
+            <div style="display:flex;align-items:center;gap:5px;"><div style="font-size:9px;color:#666;width:20px;text-align:right;">直播</div><div style="flex:1;height:12px;background:#f1efe8;border-radius:3px;overflow:hidden;"><div style="height:100%;width:63%;background:#185FA5;border-radius:3px;"></div></div><div style="font-size:9px;color:#aaa;width:18px;">63</div></div>
+          </div>
+          <div style="font-size:9px;color:#0F6E56;text-align:right;margin-top:2px;">总计 230万 · 环比 +12.3%</div>
+          <div class="mirror-btn" style="background:#f1efe8;border-radius:5px;text-align:center;color:#666;margin-top:4px;">关闭</div></div></div>`;
+      } else if (type === 'confirm-nav') {
+        html = `<div class="screen-mirror"><div class="screen-mirror-ui">
+          <div style="font-size:10px;font-weight:500;color:#888;margin-bottom:4px;">🗺 去公司 — 路线规划</div>
+          <div style="display:flex;flex-direction:column;gap:5px;">
+            <div style="padding:6px 7px;background:#EEEDFE;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+              <div><div style="font-size:10px;font-weight:500;">🚇 地铁10号线</div><div style="font-size:8px;color:#888;">步行+乘车</div></div>
+              <div style="font-size:10px;color:#534AB7;font-weight:500;background:#fff;padding:2px 5px;border-radius:3px;">28min</div>
+            </div>
+            <div style="padding:6px 7px;background:#f7f6f3;border-radius:6px;display:flex;justify-content:space-between;align-items:center;">
+              <div><div style="font-size:10px;">🚗 驾车·三环辅路</div><div style="font-size:8px;color:#A32D2D;">路况拥堵</div></div>
+              <div style="font-size:10px;color:#A32D2D;font-weight:500;background:#FCEBEB;padding:2px 5px;border-radius:3px;">52min</div>
+            </div>
+          </div>
+          <div class="mirror-btn" style="background:#f1efe8;border-radius:5px;text-align:center;color:#666;margin-top:4px;">关闭</div></div></div>`;
+      }
+
+      div.innerHTML = `<div class="msg-avatar agent">${avatarTxt}</div><div class="msg-bubble" style="padding:6px;">${html}</div>`;
+      chatArea.appendChild(div);
+      chatArea.scrollTop = chatArea.scrollHeight;
+      resolve();
+    }, delay);
+  });
+}
+
+function clearChat() {
+  chatArea.innerHTML = '';
+}
+
+// ===== SCENARIOS =====
+let currentScenario = 'photo';
+
+async function loadScenario(id) {
+  currentScenario = id;
+  document.querySelectorAll('.scenario-btn').forEach(b => b.classList.remove('active'));
+  event.target.classList.add('active');
+  clearChat();
+  setAtomStack([]);
+  setScreen('idle');
+  setRobotState('待机中');
+
+  if (id === 'photo') await runPhotoScenario();
+  else if (id === 'report') await runReportScenario();
+  else if (id === 'nav') await runNavScenario();
+}
+
+async function runPhotoScenario() {
+  await addMsg('user', '分享给老王', 500);
+  setScreen('thinking'); setRobotState('理解意图…');
+
+  await addTyping(800);
+  setAtomStack(['意图识别', '联系人检索']);
+  await new Promise(r => setTimeout(r, 1200));
+  removeTyping();
+  setAtomStack(['意图识别 ✓', '联系人检索 ✓', '微信:发送图片']);
+
+  setScreen('confirm-photo');
+  setRobotState('匹配到联系人 — 屏幕确认中');
+  await addScreenMirror('confirm-photo', 600);
+}
+
+async function runReportScenario() {
+  await addMsg('user', '给我看一下本周各渠道的销售数据', 500);
+  setScreen('thinking'); setRobotState('查询数据…');
+
+  await addTyping(700);
+  setAtomStack(['意图识别', 'BI:查询数据', '可视化:生成图表']);
+  await new Promise(r => setTimeout(r, 1400));
+  removeTyping();
+
+  setScreen('confirm-report');
+  setRobotState('销售数据 — 屏幕展示中');
+  setAtomStack(['BI:查询 ✓', '可视化:图表 ✓']);
+  await addScreenMirror('confirm-report', 600);
+  setTimeout(() => { setRobotState('待机中'); setAtomStack([]); }, 3000);
+}
+
+async function runNavScenario() {
+  await addMsg('user', '我要去公司，现在路况怎样，推荐怎么走', 500);
+  setScreen('thinking'); setRobotState('获取路况…');
+
+  await addTyping(700);
+  setAtomStack(['意图识别', '位置:当前坐标', '地图:路线规划', '交通:实时路况']);
+  await new Promise(r => setTimeout(r, 1500));
+  removeTyping();
+
+  setScreen('confirm-nav');
+  setRobotState('路线已规划 — 屏幕展示中');
+  setAtomStack(['位置:定位 ✓', '路线:规划 ✓', '路况:实时 ✓']);
+  await addScreenMirror('confirm-nav', 600);
+  setTimeout(() => { setRobotState('待机中'); setAtomStack([]); }, 3000);
+}
+
+// ===== MANUAL INPUT =====
+async function sendMsg() {
+  const input = document.getElementById('chatInput');
+  const text = input.value.trim();
+  if (!text) return;
+  input.value = '';
+
+  await addMsg('user', text);
+  setScreen('thinking'); setRobotState('理解意图…');
+  await addTyping(600);
+  setAtomStack(['意图识别']);
+  await new Promise(r => setTimeout(r, 900));
+  removeTyping();
+  setScreen('idle');
+  setRobotState('待机中');
+  setAtomStack([]);
+
+  const lowerText = text.toLowerCase();
+  if (lowerText.includes('老王') || lowerText.includes('分享') || lowerText.includes('发送')) {
+    await runPhotoScenario();
+  } else if (lowerText.includes('报表') || lowerText.includes('销售') || lowerText.includes('数据')) {
+    await runReportScenario();
+  } else if (lowerText.includes('公司') || lowerText.includes('导航') || lowerText.includes('路')) {
+    await runNavScenario();
+  } else {
+    await addScreenMirror('idle', 0);
+  }
+}
+
+function toggleMic() {
+  const btn = document.getElementById('micBtn');
+  btn.classList.toggle('active');
+  setRobotState(btn.classList.contains('active') ? '聆听中…' : '待机中');
+  setScreen(btn.classList.contains('active') ? 'thinking' : 'idle');
+}
+
+// ===== ROBOT SCREEN ACTIONS (generic) =====
+function robotAction(scenario, action) {
+  if (scenario === 'photo') {
+    if (action === 'confirm') {
+      setScreen('happy'); setRobotState('已发送');
+      setAtomStack(['微信:发送图片 ✓']);
+      addMsg('user', '✓ 已在屏幕上确认', 100);
+      addScreenMirror('happy', 400);
+    } else {
+      addMsg('user', '✗ 已在屏幕上取消', 100);
+      addScreenMirror('idle', 400);
+      goIdle();
+      return;
+    }
+  } else if (scenario === 'report') {
+    setRobotState('已查看');
+    addMsg('user', '✓ 已关闭图表', 100);
+    addScreenMirror('idle', 400);
+    goIdle();
+    return;
+  } else if (scenario === 'nav') {
+    if (action === 'metro') {
+      setScreen('happy'); setRobotState('地铁导航中');
+      setAtomStack(['导航:地铁10号线 ✓']);
+      addMsg('user', '✓ 选择地铁10号线', 100);
+      addScreenMirror('happy', 400);
+    } else if (action === 'drive') {
+      setScreen('happy'); setRobotState('驾车导航中');
+      setAtomStack(['导航:驾车 ✓']);
+      addMsg('user', '✓ 选择驾车', 100);
+      addScreenMirror('happy', 400);
+    } else {
+      addMsg('user', '✗ 已关闭路线', 100);
+      addScreenMirror('idle', 400);
+      goIdle();
+      return;
+    }
+  }
+  setTimeout(() => goIdle(), 2500);
+}
+
+function goIdle() {
+  setScreen('idle');
+  setRobotState('待机中');
+  setAtomStack([]);
+  if (!scenarioRunning) startRobotAnimLoop();
+}
+
+// ===== ROBOT AUTO ANIMATION LOOP =====
+let robotAnimTimer = null;
+let robotCycleIndex = 0;
+const robotCycleScenes = [
+  { screen: 'confirm-photo',  state: '拍照分享 — 待确认', atoms: ['微信:发送图片'] },
+  { screen: 'confirm-report', state: '数据报表 — 查看',     atoms: ['BI:销售数据'] },
+  { screen: 'confirm-nav',    state: '出行导航 — 选择路线',  atoms: ['地图:路线规划'] },
+];
+
+function startRobotAnimLoop() {
+  stopRobotAnimLoop();
+  robotAnimTimer = setTimeout(() => {
+    const scene = robotCycleScenes[robotCycleIndex % robotCycleScenes.length];
+    setScreen(scene.screen);
+    setRobotState(scene.state);
+    setAtomStack(scene.atoms);
+    robotCycleIndex++;
+  }, 3000);
+}
+
+function stopRobotAnimLoop() {
+  if (robotAnimTimer) { clearTimeout(robotAnimTimer); robotAnimTimer = null; }
+}
+
+// ===== SCENARIO OVERRIDES: stop auto-loop during scenario playback =====
+let scenarioRunning = false;
+const origLoadScenario = loadScenario;
+loadScenario = async function(id) {
+  scenarioRunning = true;
+  stopRobotAnimLoop();
+  const result = await origLoadScenario(id);
+  scenarioRunning = false;
+  setTimeout(() => startRobotAnimLoop(), 3000);
+  return result;
+};
+
+// Init
+window.addEventListener('load', () => {
+  startRobotAnimLoop();
+  runPhotoScenario();
+});
+</script>
+</body>
+</html>
